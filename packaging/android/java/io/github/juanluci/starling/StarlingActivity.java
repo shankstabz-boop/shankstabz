@@ -269,12 +269,11 @@ public class StarlingActivity extends NativeActivity {
         });
     }
 
-    @Override
+        @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
         super.onPointerCaptureChanged(hasCapture);
-        boolean lockFocus = getIntent() == null || getIntent().getBooleanExtra(LauncherActivity.KEY_LOCK, true);
         if (!hasCapture && pointerWanted) {
-            if (lockFocus && hasWindowFocus()) {
+            if (hasWindowFocus()) {
                 View decor = getWindow().getDecorView();
                 decor.requestFocus();
                 decor.requestPointerCapture();
@@ -284,6 +283,21 @@ public class StarlingActivity extends NativeActivity {
             onPointerCaptureLost();
         }
     }
+
+    @Override
+    public boolean dispatchKeyEvent(android.view.KeyEvent event) {
+        if (pointerWanted && hasWindowFocus()) {
+            View decor = getWindow().getDecorView();
+            if (!decor.hasFocus()) {
+                decor.requestFocus();
+            }
+            if (android.os.Build.VERSION.SDK_INT >= 26 && !decor.hasPointerCapture()) {
+                decor.requestPointerCapture();
+            }
+        }
+        return super.dispatchKeyEvent(event);
+    }
+
 
 
     /** A controller's maker (its USB vendor id), for the game's button pictures; 0 unknown. */
