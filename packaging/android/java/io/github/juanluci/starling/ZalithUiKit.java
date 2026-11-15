@@ -1,8 +1,7 @@
 package io.github.juanluci.starling;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.graphics.*;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
@@ -23,15 +22,15 @@ public final class ZalithUiKit {
         } else act.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
-    static GradientDrawable bgGradient() { return new GradientDrawable(GradientDrawable.Orientation.TL_BR, new int[]{0xFF1C2026, 0xFF121316}); }
+    static GradientDrawable bgGradient() { return new GradientDrawable(GradientDrawable.Orientation.TL_BR, new int[]{0xFF1F2126, 0xFF121316}); }
 
     static int accent(SharedPreferences p) {
-        String t = p.getString("color_theme", "Dynamic");
-        if ("Embermire".equals(t)) return 0xFFF97316;
+        String t = p.getString("color_theme", "Oxide");
+        if ("Dynamic".equals(t)) return 0xFF67D5E8;
         if ("Velvet Rose".equals(t)) return 0xFFF43F5E;
         if ("Mistwave".equals(t)) return 0xFF38BDF8;
         if ("Glacier".equals(t)) return 0xFFA5F3FC;
-        return 0xFF67D5E8;
+        return 0xFFD97736;
     }
 
     static void animateIn(View v) {
@@ -48,7 +47,7 @@ public final class ZalithUiKit {
     }
 
     static ImageView navIcon(Context c, int type, View.OnClickListener l) {
-        ImageView iv = new ImageView(c); iv.setImageBitmap(drawGlyph(dp(c, 18), type, 0xFF93C5FD));
+        ImageView iv = new ImageView(c); iv.setImageBitmap(drawGlyph(dp(c, 18), type, 0xFFFDBA74));
         iv.setBackground(roundRect(CARD_GRAY, dp(c, 9))); int pad = dp(c, 7); iv.setPadding(pad, pad, pad, pad);
         addBounce(iv); iv.setOnClickListener(l); return iv;
     }
@@ -67,7 +66,7 @@ public final class ZalithUiKit {
     }
 
     static Button pillBtn(Context c, String txt, int bg, int sp) {
-        Button b = new Button(c); b.setText(txt); b.setAllCaps(false); b.setTextColor(0xFF071E24);
+        Button b = new Button(c); b.setText(txt); b.setAllCaps(false); b.setTextColor(0xFF1A0D04);
         b.setTypeface(Typeface.DEFAULT_BOLD); b.setTextSize(TypedValue.COMPLEX_UNIT_SP, sp);
         b.setBackground(roundRect(bg, dp(c, 18))); b.setMinHeight(0); b.setMinimumHeight(0); addBounce(b); return b;
     }
@@ -83,7 +82,7 @@ public final class ZalithUiKit {
         Bitmap b = Bitmap.createBitmap(sz, sz, Bitmap.Config.ARGB_8888); Canvas c = new Canvas(b); Paint p = new Paint(Paint.ANTI_ALIAS_FLAG); float mid = sz * 0.5f;
         p.setColor(0xFF282C34); c.drawRoundRect(0, 0, sz, sz, sz * 0.24f, sz * 0.24f, p);
         Path hex = new Path(); hex.moveTo(mid, sz * 0.14f); hex.lineTo(sz * 0.82f, sz * 0.32f); hex.lineTo(sz * 0.82f, sz * 0.68f); hex.lineTo(mid, sz * 0.86f); hex.lineTo(sz * 0.18f, sz * 0.68f); hex.lineTo(sz * 0.18f, sz * 0.32f); hex.close();
-        p.setColor(0xFFD97736); c.drawPath(hex, p); p.setColor(0xFF1C2026); c.drawCircle(mid, mid, sz * 0.21f, p); p.setColor(0xFF67D5E8); c.drawCircle(mid, mid, sz * 0.11f, p);
+        p.setColor(0xFFD97736); c.drawPath(hex, p); p.setColor(0xFF1C2026); c.drawCircle(mid, mid, sz * 0.21f, p); p.setColor(0xFFFDBA74); c.drawCircle(mid, mid, sz * 0.10f, p);
         return b;
     }
 
