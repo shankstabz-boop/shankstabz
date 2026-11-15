@@ -19,7 +19,6 @@ public final class ZalithDownloadsView {
         LinearLayout body = new LinearLayout(act);
         body.setOrientation(LinearLayout.HORIZONTAL);
 
-        // Left Sidebar (Game, Modpack, Mod, Resource Pack, Saves, Shader Pack, Search by ID, Favorites)
         ScrollView sideSc = new ScrollView(act);
         LinearLayout side = new LinearLayout(act);
         side.setOrientation(LinearLayout.VERTICAL);
@@ -55,52 +54,56 @@ public final class ZalithDownloadsView {
 
     private static void renderCategory(LauncherActivity act, String cat, int accent, LinearLayout col) {
         col.removeAllViews();
-        String[][] rows = "Game".equals(cat)
-                ? new String[][]{{"26.3", "Horizon Rust Native (Installed)"}, {"26.2", "Vanilla Assets Compatible"}, {"26.1.2", "Legacy Rust Build"}}
-                : new String[][]{{"Starling Native " + cat, "Compatible with Rust 26.3 (.hmod / .zip)"}, {"Performance Pack", "Low-end mobile optimization"}};
-
-        for (final String[] r : rows) {
-            LinearLayout card = new LinearLayout(act);
-            card.setGravity(Gravity.CENTER_VERTICAL);
-            card.setBackground(ZalithUiKit.roundRect(ZalithUiKit.CARD_GRAY, ZalithUiKit.dp(act, 14)));
-            card.setPadding(ZalithUiKit.dp(act, 14), ZalithUiKit.dp(act, 12), ZalithUiKit.dp(act, 14), ZalithUiKit.dp(act, 12));
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            lp.bottomMargin = ZalithUiKit.dp(act, 10);
-
-            ImageView ic = new ImageView(act);
-            ic.setImageBitmap(ZalithUiKit.rustIcon(ZalithUiKit.dp(act, 34)));
-            card.addView(ic, new LinearLayout.LayoutParams(ZalithUiKit.dp(act, 34), ZalithUiKit.dp(act, 34)));
-
-            LinearLayout meta = new LinearLayout(act);
-            meta.setOrientation(LinearLayout.VERTICAL);
-            meta.setPadding(ZalithUiKit.dp(act, 12), 0, 0, 0);
-            TextView t1 = new TextView(act);
-            t1.setText(r[0]);
-            t1.setTextColor(0xFFFFFFFF);
-            t1.setTypeface(Typeface.DEFAULT_BOLD);
-            meta.addView(t1);
-            TextView t2 = new TextView(act);
-            t2.setText(r[1]);
-            t2.setTextColor(0xFF9CA3AF);
-            t2.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
-            meta.addView(t2);
-            card.addView(meta, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-
-            TextView dl = new TextView(act);
-            dl.setText("⬇");
-            dl.setTextColor(accent);
-            dl.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-            card.addView(dl);
-            card.setOnClickListener(v -> Toast.makeText(act, "Ready: " + r[0], Toast.LENGTH_SHORT).show());
-            col.addView(card, lp);
+        if ("Game".equals(cat)) {
+            addDlRow(act, col, accent, "26.3", "Horizon Rust Native (Installed)");
+            addDlRow(act, col, accent, "26.2", "Vanilla Assets Compatible");
+            addDlRow(act, col, accent, "26.1.2", "Legacy Rust Build");
+        } else {
+            addDlRow(act, col, accent, "Starling Native " + cat, "Compatible with Rust 26.3 (.hmod / .zip)");
+            addDlRow(act, col, accent, "Performance Pack", "Low-end mobile optimization");
         }
+    }
+
+    private static void addDlRow(final LauncherActivity act, LinearLayout col, int accent, final String title, String sub) {
+        LinearLayout card = new LinearLayout(act);
+        card.setGravity(Gravity.CENTER_VERTICAL);
+        card.setBackground(ZalithUiKit.roundRect(ZalithUiKit.CARD_GRAY, ZalithUiKit.dp(act, 14)));
+        card.setPadding(ZalithUiKit.dp(act, 14), ZalithUiKit.dp(act, 12), ZalithUiKit.dp(act, 14), ZalithUiKit.dp(act, 12));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.bottomMargin = ZalithUiKit.dp(act, 10);
+
+        ImageView ic = new ImageView(act);
+        ic.setImageBitmap(ZalithUiKit.rustIcon(ZalithUiKit.dp(act, 34)));
+        card.addView(ic, new LinearLayout.LayoutParams(ZalithUiKit.dp(act, 34), ZalithUiKit.dp(act, 34)));
+
+        LinearLayout meta = new LinearLayout(act);
+        meta.setOrientation(LinearLayout.VERTICAL);
+        meta.setPadding(ZalithUiKit.dp(act, 12), 0, 0, 0);
+        TextView t1 = new TextView(act);
+        t1.setText(title);
+        t1.setTextColor(0xFFFFFFFF);
+        t1.setTypeface(Typeface.DEFAULT_BOLD);
+        meta.addView(t1);
+        TextView t2 = new TextView(act);
+        t2.setText(sub);
+        t2.setTextColor(0xFF9CA3AF);
+        t2.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+        meta.addView(t2);
+        card.addView(meta, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        TextView dl = new TextView(act);
+        dl.setText("⬇");
+        dl.setTextColor(accent);
+        dl.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        card.addView(dl);
+        card.setOnClickListener(v -> Toast.makeText(act, "Ready: " + title, Toast.LENGTH_SHORT).show());
+        col.addView(card, lp);
     }
 
     public static View buildMultiplayer(final LauncherActivity act, final SharedPreferences p) {
         LinearLayout body = new LinearLayout(act);
         body.setOrientation(LinearLayout.HORIZONTAL);
 
-        // Left User Notice Card
         LinearLayout left = new LinearLayout(act);
         left.setOrientation(LinearLayout.VERTICAL);
         left.setBackground(ZalithUiKit.roundRect(ZalithUiKit.CARD_GRAY, ZalithUiKit.dp(act, 16)));
@@ -122,7 +125,6 @@ public final class ZalithDownloadsView {
         left.addView(info);
         body.addView(left, llp);
 
-        // Right Toggle Cards
         LinearLayout right = new LinearLayout(act);
         right.setOrientation(LinearLayout.VERTICAL);
         body.addView(right, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f));
