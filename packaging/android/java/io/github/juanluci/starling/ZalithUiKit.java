@@ -20,12 +20,12 @@ import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.ImageView;
 
 public final class ZalithUiKit {
-    static final int BG_DARK = 0xFF17181B;
-    static final int CARD_GRAY = 0xFF232529;
-    static final int CARD_LIGHT = 0xFF2E3136;
+    static final int BG_DARK = 0xFF141619;
+    static final int CARD_GRAY = 0xFF202328;
+    static final int CARD_LIGHT = 0xFF2A2E35;
 
     @SuppressWarnings("deprecation")
     static void makeFullscreen(Activity act) {
@@ -42,6 +42,10 @@ public final class ZalithUiKit {
         }
     }
 
+    static GradientDrawable bgGradient() {
+        return new GradientDrawable(GradientDrawable.Orientation.TL_BR, new int[]{0xFF1C2026, 0xFF121316});
+    }
+
     static int accent(SharedPreferences p) {
         String t = p.getString("color_theme", "Dynamic");
         if ("Embermire".equals(t)) return 0xFFF97316;
@@ -54,34 +58,68 @@ public final class ZalithUiKit {
     static void animateIn(View v) {
         AnimationSet set = new AnimationSet(true);
         set.setInterpolator(new DecelerateInterpolator(1.6f));
-        set.setDuration(240);
+        set.setDuration(220);
         set.addAnimation(new AlphaAnimation(0f, 1f));
-        set.addAnimation(new TranslateAnimation(0f, 0f, 22f, 0f));
+        set.addAnimation(new TranslateAnimation(0f, 0f, 18f, 0f));
         v.startAnimation(set);
     }
 
     static void addBounce(final View v) {
         v.setOnTouchListener((view, ev) -> {
-            if (ev.getAction() == MotionEvent.ACTION_DOWN) view.animate().scaleX(0.95f).scaleY(0.95f).setDuration(90).start();
-            else if (ev.getAction() == MotionEvent.ACTION_UP || ev.getAction() == MotionEvent.ACTION_CANCEL) view.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+            if (ev.getAction() == MotionEvent.ACTION_DOWN) view.animate().scaleX(0.92f).scaleY(0.92f).setDuration(80).start();
+            else if (ev.getAction() == MotionEvent.ACTION_UP || ev.getAction() == MotionEvent.ACTION_CANCEL) view.animate().scaleX(1f).scaleY(1f).setDuration(110).start();
             return false;
         });
     }
 
-    static TextView topIcon(Context c, String g, View.OnClickListener l) {
-        TextView t = new TextView(c);
-        t.setText(g); t.setTextColor(0xFFE5E7EB); t.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-        t.setBackground(roundRect(CARD_GRAY, dp(c, 10)));
-        t.setPadding(dp(c, 11), dp(c, 6), dp(c, 11), dp(c, 6));
-        addBounce(t); t.setOnClickListener(l);
-        return t;
+    static ImageView navIcon(Context c, int type, View.OnClickListener l) {
+        ImageView iv = new ImageView(c);
+        iv.setImageBitmap(drawGlyph(dp(c, 18), type));
+        iv.setBackground(roundRect(CARD_GRAY, dp(c, 8)));
+        int pad = dp(c, 7);
+        iv.setPadding(pad, pad, pad, pad);
+        addBounce(iv);
+        iv.setOnClickListener(l);
+        return iv;
+    }
+
+    static Bitmap drawGlyph(int sz, int type) {
+        Bitmap b = Bitmap.createBitmap(sz, sz, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(b);
+        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+        p.setColor(0xFFE5E7EB);
+        p.setStyle(Paint.Style.STROKE);
+        p.setStrokeWidth(sz * 0.11f);
+        p.setStrokeCap(Paint.Cap.ROUND);
+        float m = sz * 0.18f, e = sz * 0.82f, mid = sz * 0.5f;
+        if (type == 0) { // Folder
+            c.drawRect(m, sz * 0.30f, e, sz * 0.78f, p);
+            c.drawLine(m, sz * 0.30f, mid, sz * 0.22f, p);
+        } else if (type == 1) { // Account
+            c.drawCircle(mid, sz * 0.34f, sz * 0.15f, p);
+            c.drawArc(sz * 0.22f, sz * 0.54f, sz * 0.78f, sz * 0.96f, 180, 180, false, p);
+        } else if (type == 2) { // Globe / Multiplayer
+            c.drawCircle(mid, mid, sz * 0.32f, p);
+            c.drawLine(m, mid, e, mid, p);
+            c.drawLine(mid, m, mid, e, p);
+        } else if (type == 3) { // Download
+            c.drawLine(mid, m, mid, sz * 0.66f, p);
+            c.drawLine(sz * 0.34f, sz * 0.50f, mid, sz * 0.66f, p);
+            c.drawLine(sz * 0.66f, sz * 0.50f, mid, sz * 0.66f, p);
+            c.drawLine(m, e, e, e, p);
+        } else { // Gear
+            c.drawCircle(mid, mid, sz * 0.22f, p);
+            c.drawCircle(mid, mid, sz * 0.33f, p);
+        }
+        return b;
     }
 
     static Button pillBtn(Context c, String txt, int bg, int sp) {
         Button b = new Button(c);
-        b.setText(txt); b.setAllCaps(false); b.setTextColor(0xFF0A252B);
+        b.setText(txt); b.setAllCaps(false); b.setTextColor(0xFF071E24);
         b.setTypeface(Typeface.DEFAULT_BOLD); b.setTextSize(TypedValue.COMPLEX_UNIT_SP, sp);
-        b.setBackground(roundRect(bg, dp(c, 22)));
+        b.setBackground(roundRect(bg, dp(c, 18)));
+        b.setMinHeight(0); b.setMinimumHeight(0);
         addBounce(b);
         return b;
     }
@@ -99,15 +137,15 @@ public final class ZalithUiKit {
     static Bitmap rustIcon(int sz) {
         Bitmap b = Bitmap.createBitmap(8, 8, Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(b); Paint p = new Paint();
-        p.setColor(0xFFB45309); c.drawRect(0, 0, 8, 8, p);
+        p.setColor(0xFF9A3412); c.drawRect(0, 0, 8, 8, p);
         p.setColor(0xFFF59E0B); c.drawRect(1, 1, 7, 7, p);
-        p.setColor(0xFF78350F); c.drawRect(2, 2, 6, 6, p);
+        p.setColor(0xFF451A03); c.drawRect(2, 2, 6, 6, p);
         return Bitmap.createScaledBitmap(b, sz, sz, false);
     }
 
     static GradientDrawable roundRect(int col, int r) {
         GradientDrawable d = new GradientDrawable();
-        d.setColor(col); d.setCornerRadius(r); d.setStroke(2, 0x22FFFFFF);
+        d.setColor(col); d.setCornerRadius(r); d.setStroke(1, 0x26FFFFFF);
         return d;
     }
 
