@@ -18,8 +18,8 @@
         <package android:name="dev.horizon.android" />
     </queries>
     <application
-        android:label="ZalithLauncher Rust"
-        android:icon="@drawable/ic_zalith_rust"
+        android:label="Oxide"
+        android:icon="@drawable/ic_oxide"
         android:hasCode="true"
         android:isGame="true"
         android:appCategory="game"
