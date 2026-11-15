@@ -9,6 +9,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -40,7 +41,6 @@ public final class ZalithGameOverlay {
         drawer.setPadding(ZalithUiKit.dp(act, 16), ZalithUiKit.dp(act, 36), ZalithUiKit.dp(act, 16), ZalithUiKit.dp(act, 16));
         drawer.setVisibility(View.GONE);
 
-        // Left Panel (5 Tabs: Controls, Mouse, Gamepad, Touch, Gyroscope)
         LinearLayout leftPanel = new LinearLayout(act);
         leftPanel.setOrientation(LinearLayout.VERTICAL);
         leftPanel.setBackground(ZalithUiKit.roundRect(ZalithUiKit.BG_DARK, ZalithUiKit.dp(act, 18)));
@@ -68,7 +68,6 @@ public final class ZalithGameOverlay {
         leftPanel.addView(lSc);
         drawer.addView(leftPanel, llp);
 
-        // Right Panel (Game Menu)
         ScrollView rSc = new ScrollView(act);
         LinearLayout rightPanel = new LinearLayout(act);
         rightPanel.setOrientation(LinearLayout.VERTICAL);
@@ -89,9 +88,9 @@ public final class ZalithGameOverlay {
         forceClose.setOnClickListener(v -> android.os.Process.killProcess(android.os.Process.myPid()));
         rightPanel.addView(forceClose, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ZalithUiKit.dp(act, 40)));
 
-        rightPanel.addView(rowSwitch(act, "Enable Menu Overlay", true, c -> topPill.setAlpha(c ? 1f : 0.15f)));
-        rightPanel.addView(rowSwitch(act, "FPS Display", true, c -> pillText.setText(c ? "☰  FPS: 60" : "☰  Menu")));
-        rightPanel.addView(rowSwitch(act, "Memory Display", false, c -> pillText.setText(c ? "☰  FPS: 60 | RAM: OK" : "☰  FPS: 60")));
+        rightPanel.addView(rowSwitch(act, "Enable Menu Overlay", true, (b, c) -> topPill.setAlpha(c ? 1f : 0.15f)));
+        rightPanel.addView(rowSwitch(act, "FPS Display", true, (b, c) -> pillText.setText(c ? "☰  FPS: 60" : "☰  Menu")));
+        rightPanel.addView(rowSwitch(act, "Memory Display", false, (b, c) -> pillText.setText(c ? "☰  FPS: 60 | RAM: OK" : "☰  FPS: 60")));
         drawer.addView(rSc, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f));
 
         root.addView(drawer, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -135,7 +134,7 @@ public final class ZalithGameOverlay {
         }
     }
 
-    private static View rowSwitch(Activity act, String txt, boolean def, android.widget.CompoundButton.OnCheckedChangeListener l) {
+    private static View rowSwitch(Activity act, String txt, boolean def, CompoundButton.OnCheckedChangeListener l) {
         LinearLayout r = new LinearLayout(act);
         r.setGravity(Gravity.CENTER_VERTICAL);
         r.setBackground(ZalithUiKit.roundRect(ZalithUiKit.CARD_GRAY, ZalithUiKit.dp(act, 12)));
