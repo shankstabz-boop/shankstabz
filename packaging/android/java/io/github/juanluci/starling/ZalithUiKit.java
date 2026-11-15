@@ -1,155 +1,146 @@
 package io.github.juanluci.starling;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
+import android.content.pm.ActivityInfo;
 import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.util.TypedValue;
-import android.view.MotionEvent;
+import android.view.Gravity;
 import android.view.View;
-import android.view.WindowInsets;
-import android.view.WindowInsetsController;
-import android.view.WindowManager;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.AnimationSet;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.TranslateAnimation;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
-public final class ZalithUiKit {
-    static final int BG_DARK = 0xFF141619;
-    static final int CARD_GRAY = 0xFF202328;
-    static final int CARD_LIGHT = 0xFF2A2E35;
-
-    @SuppressWarnings("deprecation")
-    static void makeFullscreen(Activity act) {
-        act.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        if (Build.VERSION.SDK_INT >= 30) {
-            WindowInsetsController c = act.getWindow().getInsetsController();
-            if (c != null) {
-                c.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
-                c.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-            }
-        } else {
-            act.getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+public final class ZalithDashboard {
+    public static void attach(final LauncherActivity act) {
+        if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {
+            try { act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE); } catch (Exception ignored) {}
         }
+        final SharedPreferences p = act.getSharedPreferences(LauncherActivity.PREFS, Context.MODE_PRIVATE);
+        if (!p.contains("accounts_list")) p.edit().putString("accounts_list", "Player").putString(LauncherActivity.KEY_USER, "Player").apply();
+
+        LinearLayout root = new LinearLayout(act);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackground(ZalithUiKit.bgGradient());
+        root.setFitsSystemWindows(true);
+        root.setPadding(ZalithUiKit.dp(act, 16), ZalithUiKit.dp(act, 14), ZalithUiKit.dp(act, 16), ZalithUiKit.dp(act, 12));
+
+        LinearLayout topBar = new LinearLayout(act);
+        topBar.setGravity(Gravity.CENTER_VERTICAL);
+        topBar.setPadding(0, 0, 0, ZalithUiKit.dp(act, 10));
+
+        final TextView back = new TextView(act);
+        back.setText("← "); back.setTextColor(0xFFFFFFFF); back.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16); back.setVisibility(View.GONE);
+        topBar.addView(back);
+
+        final TextView title = new TextView(act);
+        title.setText("ZalithLauncher"); title.setTextColor(0xFFF3F4F6); title.setTypeface(Typeface.DEFAULT_BOLD); title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        topBar.addView(title, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        final FrameLayout host = new FrameLayout(act);
+        Runnable goHome = () -> {
+            back.setVisibility(View.GONE); title.setText("ZalithLauncher"); title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+            host.removeAllViews();
+            View h = buildHome(act, p, back, title, host,
+                    () -> open(back, title, host, "Account List", ZalithAccountsView.build(act, p)),
+                    () -> open(back, title, host, "Settings - Renderer", ZalithSettingsView.build(act, p, title)));
+            host.addView(h); ZalithUiKit.animateIn(h);
+        };
+        back.setOnClickListener(v -> goHome.run());
+
+        addBtn(act, topBar, 0, v -> open(back, title, host, "File Manager", ZalithFilesView.build(act, title)));
+        addBtn(act, topBar, 1, v -> open(back, title, host, "Account List", ZalithAccountsView.build(act, p)));
+        addBtn(act, topBar, 2, v -> open(back, title, host, "Terracotta | Multiplayer", ZalithDownloadsView.buildMultiplayer(act, p)));
+        addBtn(act, topBar, 3, v -> open(back, title, host, "Download - Game", ZalithDownloadsView.build(act, p, title)));
+        addBtn(act, topBar, 4, v -> open(back, title, host, "Settings - Renderer", ZalithSettingsView.build(act, p, title)));
+        root.addView(topBar);
+        root.addView(host, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+
+        act.setContentView(root);
+        ZalithUiKit.makeFullscreen(act);
+        goHome.run();
     }
 
-    static GradientDrawable bgGradient() {
-        return new GradientDrawable(GradientDrawable.Orientation.TL_BR, new int[]{0xFF1C2026, 0xFF121316});
+    private static void addBtn(LauncherActivity act, LinearLayout bar, int type, View.OnClickListener l) {
+        ImageView b = ZalithUiKit.navIcon(act, type, l);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.leftMargin = ZalithUiKit.dp(act, 6);
+        bar.addView(b, lp);
     }
 
-    static int accent(SharedPreferences p) {
-        String t = p.getString("color_theme", "Dynamic");
-        if ("Embermire".equals(t)) return 0xFFF97316;
-        if ("Velvet Rose".equals(t)) return 0xFFF43F5E;
-        if ("Mistwave".equals(t)) return 0xFF38BDF8;
-        if ("Glacier".equals(t)) return 0xFFA5F3FC;
-        return 0xFF67D5E8;
+    private static void open(TextView back, TextView title, FrameLayout host, String h, View v) {
+        back.setVisibility(View.VISIBLE); title.setText(h); title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        host.removeAllViews(); host.addView(v); ZalithUiKit.animateIn(v);
     }
 
-    static void animateIn(View v) {
-        AnimationSet set = new AnimationSet(true);
-        set.setInterpolator(new DecelerateInterpolator(1.6f));
-        set.setDuration(220);
-        set.addAnimation(new AlphaAnimation(0f, 1f));
-        set.addAnimation(new TranslateAnimation(0f, 0f, 18f, 0f));
-        v.startAnimation(set);
-    }
+    private static View buildHome(final LauncherActivity act, final SharedPreferences p,
+            final TextView back, final TextView title, final FrameLayout host, Runnable onAcc, Runnable onSet) {
+        int accent = ZalithUiKit.accent(p);
+        LinearLayout body = new LinearLayout(act);
+        LinearLayout left = new LinearLayout(act); left.setOrientation(LinearLayout.VERTICAL);
+        body.addView(left, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1.55f));
 
-    static void addBounce(final View v) {
-        v.setOnTouchListener((view, ev) -> {
-            if (ev.getAction() == MotionEvent.ACTION_DOWN) view.animate().scaleX(0.92f).scaleY(0.92f).setDuration(80).start();
-            else if (ev.getAction() == MotionEvent.ACTION_UP || ev.getAction() == MotionEvent.ACTION_CANCEL) view.animate().scaleX(1f).scaleY(1f).setDuration(110).start();
-            return false;
-        });
-    }
+        LinearLayout card = new LinearLayout(act); card.setOrientation(LinearLayout.VERTICAL);
+        card.setBackground(ZalithUiKit.roundRect(ZalithUiKit.CARD_GRAY, ZalithUiKit.dp(act, 14)));
+        card.setPadding(ZalithUiKit.dp(act, 12), ZalithUiKit.dp(act, 12), ZalithUiKit.dp(act, 12), ZalithUiKit.dp(act, 12));
+        left.addView(card, new LinearLayout.LayoutParams(ZalithUiKit.dp(act, 195), ViewGroup.LayoutParams.WRAP_CONTENT));
 
-    static ImageView navIcon(Context c, int type, View.OnClickListener l) {
-        ImageView iv = new ImageView(c);
-        iv.setImageBitmap(drawGlyph(dp(c, 18), type));
-        iv.setBackground(roundRect(CARD_GRAY, dp(c, 8)));
-        int pad = dp(c, 7);
-        iv.setPadding(pad, pad, pad, pad);
-        addBounce(iv);
-        iv.setOnClickListener(l);
-        return iv;
-    }
+        LinearLayout row = new LinearLayout(act); row.setGravity(Gravity.CENTER_VERTICAL);
+        ImageView ic = new ImageView(act); ic.setImageBitmap(ZalithUiKit.rustIcon(ZalithUiKit.dp(act, 32)));
+        row.addView(ic, new LinearLayout.LayoutParams(ZalithUiKit.dp(act, 32), ZalithUiKit.dp(act, 32)));
 
-    static Bitmap drawGlyph(int sz, int type) {
-        Bitmap b = Bitmap.createBitmap(sz, sz, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(b);
-        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
-        p.setColor(0xFFE5E7EB);
-        p.setStyle(Paint.Style.STROKE);
-        p.setStrokeWidth(sz * 0.11f);
-        p.setStrokeCap(Paint.Cap.ROUND);
-        float m = sz * 0.18f, e = sz * 0.82f, mid = sz * 0.5f;
-        if (type == 0) { // Folder
-            c.drawRect(m, sz * 0.30f, e, sz * 0.78f, p);
-            c.drawLine(m, sz * 0.30f, mid, sz * 0.22f, p);
-        } else if (type == 1) { // Account
-            c.drawCircle(mid, sz * 0.34f, sz * 0.15f, p);
-            c.drawArc(sz * 0.22f, sz * 0.54f, sz * 0.78f, sz * 0.96f, 180, 180, false, p);
-        } else if (type == 2) { // Globe / Multiplayer
-            c.drawCircle(mid, mid, sz * 0.32f, p);
-            c.drawLine(m, mid, e, mid, p);
-            c.drawLine(mid, m, mid, e, p);
-        } else if (type == 3) { // Download
-            c.drawLine(mid, m, mid, sz * 0.66f, p);
-            c.drawLine(sz * 0.34f, sz * 0.50f, mid, sz * 0.66f, p);
-            c.drawLine(sz * 0.66f, sz * 0.50f, mid, sz * 0.66f, p);
-            c.drawLine(m, e, e, e, p);
-        } else { // Gear
-            c.drawCircle(mid, mid, sz * 0.22f, p);
-            c.drawCircle(mid, mid, sz * 0.33f, p);
-        }
-        return b;
-    }
+        LinearLayout meta = new LinearLayout(act); meta.setOrientation(LinearLayout.VERTICAL); meta.setPadding(ZalithUiKit.dp(act, 9), 0, 0, 0);
+        TextView n = new TextView(act); n.setText("Rust Optimized 26.3"); n.setTextColor(0xFFFFFFFF); n.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12); n.setTypeface(Typeface.DEFAULT_BOLD); meta.addView(n);
+        TextView v = new TextView(act); v.setText("26.3  •  Horizon Rust"); v.setTextColor(0xFF9CA3AF); v.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10); meta.addView(v);
+        row.addView(meta); row.setOnClickListener(x -> open(back, title, host, "Version List", ZalithVersionsView.buildList(act, p, title)));
+        card.addView(row);
 
-    static Button pillBtn(Context c, String txt, int bg, int sp) {
-        Button b = new Button(c);
-        b.setText(txt); b.setAllCaps(false); b.setTextColor(0xFF071E24);
-        b.setTypeface(Typeface.DEFAULT_BOLD); b.setTextSize(TypedValue.COMPLEX_UNIT_SP, sp);
-        b.setBackground(roundRect(bg, dp(c, 18)));
-        b.setMinHeight(0); b.setMinimumHeight(0);
-        addBounce(b);
-        return b;
-    }
+        Button lPlay = ZalithUiKit.pillBtn(act, "▶  Launch", accent, 11);
+        LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ZalithUiKit.dp(act, 30));
+        llp.topMargin = ZalithUiKit.dp(act, 10); lPlay.setOnClickListener(x -> ZalithLaunchDialog.show(act, p, () -> act.play()));
+        card.addView(lPlay, llp);
 
-    static Bitmap skinHead(int sz) {
-        Bitmap b = Bitmap.createBitmap(8, 8, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(b); Paint p = new Paint();
-        p.setColor(0xFFE5E7EB); c.drawRect(0, 0, 8, 8, p);
-        p.setColor(0xFF9CA3AF); c.drawRect(0, 0, 8, 2, p); c.drawRect(0, 2, 1, 6, p); c.drawRect(7, 2, 8, 6, p);
-        p.setColor(0xFFFDE6D8); c.drawRect(1, 3, 7, 8, p);
-        p.setColor(0xFF1E293B); c.drawRect(2, 4, 3, 6, p); c.drawRect(5, 4, 6, 6, p);
-        return Bitmap.createScaledBitmap(b, sz, sz, false);
-    }
+        LinearLayout rCard = new LinearLayout(act); rCard.setOrientation(LinearLayout.VERTICAL); rCard.setGravity(Gravity.CENTER_HORIZONTAL);
+        rCard.setBackground(ZalithUiKit.roundRect(ZalithUiKit.CARD_GRAY, ZalithUiKit.dp(act, 16)));
+        rCard.setPadding(ZalithUiKit.dp(act, 14), ZalithUiKit.dp(act, 12), ZalithUiKit.dp(act, 14), ZalithUiKit.dp(act, 12));
+        LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f);
+        rlp.leftMargin = ZalithUiKit.dp(act, 14); body.addView(rCard, rlp);
 
-    static Bitmap rustIcon(int sz) {
-        Bitmap b = Bitmap.createBitmap(8, 8, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(b); Paint p = new Paint();
-        p.setColor(0xFF9A3412); c.drawRect(0, 0, 8, 8, p);
-        p.setColor(0xFFF59E0B); c.drawRect(1, 1, 7, 7, p);
-        p.setColor(0xFF451A03); c.drawRect(2, 2, 6, 6, p);
-        return Bitmap.createScaledBitmap(b, sz, sz, false);
-    }
+        rCard.addView(new View(act), new LinearLayout.LayoutParams(1, 0, 0.3f));
+        ImageView head = new ImageView(act); head.setImageBitmap(ZalithUiKit.skinHead(ZalithUiKit.dp(act, 48)));
+        ZalithUiKit.addBounce(head); head.setOnClickListener(x -> onAcc.run());
+        rCard.addView(head, new LinearLayout.LayoutParams(ZalithUiKit.dp(act, 48), ZalithUiKit.dp(act, 48)));
 
-    static GradientDrawable roundRect(int col, int r) {
-        GradientDrawable d = new GradientDrawable();
-        d.setColor(col); d.setCornerRadius(r); d.setStroke(1, 0x26FFFFFF);
-        return d;
-    }
+        TextView uName = new TextView(act); uName.setText(p.getString(LauncherActivity.KEY_USER, "Player"));
+        uName.setTextColor(0xFFFFFFFF); uName.setTypeface(Typeface.DEFAULT_BOLD); uName.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+        uName.setPadding(0, ZalithUiKit.dp(act, 6), 0, ZalithUiKit.dp(act, 1)); uName.setOnClickListener(x -> onAcc.run());
+        rCard.addView(uName);
 
-    static int dp(Context c, int v) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, v, c.getResources().getDisplayMetrics());
+        TextView off = new TextView(act); off.setText("Offline"); off.setTextColor(0xFF9CA3AF); off.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
+        rCard.addView(off); rCard.addView(new View(act), new LinearLayout.LayoutParams(1, 0, 1f));
+
+        LinearLayout vRow = new LinearLayout(act); vRow.setGravity(Gravity.CENTER_VERTICAL); vRow.setPadding(ZalithUiKit.dp(act, 2), 0, ZalithUiKit.dp(act, 2), ZalithUiKit.dp(act, 8));
+        ImageView sm = new ImageView(act); sm.setImageBitmap(ZalithUiKit.rustIcon(ZalithUiKit.dp(act, 22)));
+        vRow.addView(sm, new LinearLayout.LayoutParams(ZalithUiKit.dp(act, 22), ZalithUiKit.dp(act, 22)));
+
+        LinearLayout vc = new LinearLayout(act); vc.setOrientation(LinearLayout.VERTICAL); vc.setPadding(ZalithUiKit.dp(act, 7), 0, 0, 0);
+        TextView vt = new TextView(act); vt.setText("Rust Optimized 26.3"); vt.setTextColor(0xFFFFFFFF); vt.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11); vc.addView(vt);
+        TextView vs = new TextView(act); vs.setText("26.3, Rust - 0.8.0"); vs.setTextColor(0xFF9CA3AF); vs.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9); vc.addView(vs);
+        vRow.addView(vc, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        ImageView gear = new ImageView(act);
+        gear.setImageBitmap(ZalithUiKit.drawGlyph(ZalithUiKit.dp(act, 18), 4));
+        ZalithUiKit.addBounce(gear); gear.setOnClickListener(x -> onSet.run());
+        vRow.addView(gear);
+        rCard.addView(vRow, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        Button mPlay = ZalithUiKit.pillBtn(act, "Launch", accent, 12);
+        mPlay.setOnClickListener(x -> ZalithLaunchDialog.show(act, p, () -> act.play()));
+        rCard.addView(mPlay, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ZalithUiKit.dp(act, 34)));
+        return body;
     }
 }
