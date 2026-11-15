@@ -441,7 +441,8 @@ public class StarlingActivity extends NativeActivity {
         if (requestCode == PICK_FILE && resultCode == RESULT_OK && data != null
                 && data.getData() != null) {
             // The game shows the copy arriving in its inbox, then the import.
-            LauncherActivity.receive(this, data.getData(), null);
+                        HorizonImport.start(this, data.getData());
+
         } else if (requestCode == PICK_HORIZON && resultCode == RESULT_OK && data != null
                 && data.getData() != null) {
             HorizonImport.start(this, data.getData());
@@ -723,8 +724,8 @@ public class StarlingActivity extends NativeActivity {
      * in a process of its own, waits for this one to end.
      */
     public void restart() {
-        Intent again = new Intent(this, LauncherActivity.class);
-        again.putExtra(LauncherActivity.AFTER, android.os.Process.myPid());
+                Intent again = new Intent(this, GameActivity.class);
+        
         again.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(again);
         runOnUiThread(new Runnable() {
