@@ -250,7 +250,7 @@ public class StarlingActivity extends NativeActivity {
      * and releaseMouse): captured, its pointer hides and its moves come to the game as relative
      * motion, through NativeActivity's input queue like every other event.
      */
-    public void capturePointer(final boolean capture) {
+    
         public void capturePointer(final boolean capture) {
         runOnUiThread(new Runnable() {
             @Override
