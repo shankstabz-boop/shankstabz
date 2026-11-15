@@ -38,12 +38,12 @@ public final class ZalithDashboard {
         topBar.addView(back);
 
         final TextView title = new TextView(act);
-        title.setText("ZalithLauncher"); title.setTextColor(0xFFF3F4F6); title.setTypeface(Typeface.DEFAULT_BOLD); title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+        title.setText("Oxide"); title.setTextColor(0xFFF3F4F6); title.setTypeface(Typeface.DEFAULT_BOLD); title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
         topBar.addView(title, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 
         final FrameLayout host = new FrameLayout(act);
         Runnable goHome = () -> {
-            back.setVisibility(View.GONE); title.setText("ZalithLauncher"); title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+            back.setVisibility(View.GONE); title.setText("Oxide"); title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
             host.removeAllViews();
             View h = buildHome(act, p, back, title, host,
                     () -> open(back, title, host, "Account List", ZalithAccountsView.build(act, p)),
