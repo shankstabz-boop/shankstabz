@@ -53,7 +53,7 @@ public final class ZalithDashboard {
             backBtn.setVisibility(View.GONE);
             titleView.setText("ZalithLauncher");
             host.removeAllViews();
-            host.addView(buildHome(act, p,
+            host.addView(buildHome(act, p, backBtn, titleView, host,
                     () -> open(backBtn, titleView, host, "Account List", ZalithAccountsView.build(act, p)),
                     () -> open(backBtn, titleView, host, "Settings - Renderer", ZalithSettingsView.build(act, p, titleView))));
         };
@@ -78,12 +78,13 @@ public final class ZalithDashboard {
         host.addView(v);
     }
 
-    private static View buildHome(final LauncherActivity act, SharedPreferences p, Runnable onAcc, Runnable onSet) {
+    private static View buildHome(final LauncherActivity act, final SharedPreferences p,
+            final TextView backBtn, final TextView titleView, final FrameLayout host,
+            Runnable onAcc, Runnable onSet) {
         int accent = ZalithUiKit.accent(p);
         LinearLayout body = new LinearLayout(act);
         body.setOrientation(LinearLayout.HORIZONTAL);
 
-        // Left Instance Card
         LinearLayout leftCol = new LinearLayout(act);
         leftCol.setOrientation(LinearLayout.VERTICAL);
         body.addView(leftCol, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1.45f));
@@ -115,15 +116,15 @@ public final class ZalithDashboard {
         v.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
         meta.addView(v);
         row.addView(meta);
+        row.setOnClickListener(x -> open(backBtn, titleView, host, "Version List", ZalithVersionsView.buildList(act, p, titleView)));
         card.addView(row);
 
         Button lPlay = ZalithUiKit.pillBtn(act, "▶  Launch", accent, 13);
         LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ZalithUiKit.dp(act, 36));
         llp.topMargin = ZalithUiKit.dp(act, 12);
-        lPlay.setOnClickListener(x -> act.play());
+        lPlay.setOnClickListener(x -> ZalithLaunchDialog.show(act, p, () -> act.play()));
         card.addView(lPlay, llp);
 
-        // Right Profile & Launch Card
         LinearLayout rCard = new LinearLayout(act);
         rCard.setOrientation(LinearLayout.VERTICAL);
         rCard.setGravity(Gravity.CENTER_HORIZONTAL);
@@ -186,7 +187,7 @@ public final class ZalithDashboard {
         rCard.addView(vRow, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         Button mPlay = ZalithUiKit.pillBtn(act, "Launch", accent, 14);
-        mPlay.setOnClickListener(x -> act.play());
+        mPlay.setOnClickListener(x -> ZalithLaunchDialog.show(act, p, () -> act.play()));
         rCard.addView(mPlay, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ZalithUiKit.dp(act, 42)));
         return body;
     }
