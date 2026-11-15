@@ -20,7 +20,6 @@ public final class ZalithVersionsView {
         final LinearLayout root = new LinearLayout(act);
         root.setOrientation(LinearLayout.HORIZONTAL);
 
-        // Left Panel (Default Game Folder + Cyan Buttons)
         LinearLayout left = new LinearLayout(act);
         left.setOrientation(LinearLayout.VERTICAL);
         left.setPadding(0, 0, ZalithUiKit.dp(act, 14), 0);
@@ -54,63 +53,62 @@ public final class ZalithVersionsView {
         cleanF.setOnClickListener(v -> Toast.makeText(act, "Cache cleaned", Toast.LENGTH_SHORT).show());
         left.addView(cleanF, b2);
 
-        // Right Version Cards
         ScrollView sc = new ScrollView(act);
         LinearLayout list = new LinearLayout(act);
         list.setOrientation(LinearLayout.VERTICAL);
         sc.addView(list);
         root.addView(sc, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f));
 
-        String[][] versions = {
-                {"Rust Optimized 26.3", "26.3   Horizon Rust - 0.8.0"},
-                {"Vanilla Rust 26.3", "26.3   Clean Native Engine"}
-        };
-        for (final String[] ver : versions) {
-            LinearLayout card = new LinearLayout(act);
-            card.setGravity(Gravity.CENTER_VERTICAL);
-            card.setBackground(ZalithUiKit.roundRect(ZalithUiKit.CARD_GRAY, ZalithUiKit.dp(act, 14)));
-            card.setPadding(ZalithUiKit.dp(act, 14), ZalithUiKit.dp(act, 12), ZalithUiKit.dp(act, 14), ZalithUiKit.dp(act, 12));
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            lp.bottomMargin = ZalithUiKit.dp(act, 10);
-
-            TextView rad = new TextView(act);
-            rad.setText("◉  ");
-            rad.setTextColor(accent);
-            rad.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-            card.addView(rad);
-
-            ImageView ic = new ImageView(act);
-            ic.setImageBitmap(ZalithUiKit.rustIcon(ZalithUiKit.dp(act, 36)));
-            card.addView(ic, new LinearLayout.LayoutParams(ZalithUiKit.dp(act, 36), ZalithUiKit.dp(act, 36)));
-
-            LinearLayout meta = new LinearLayout(act);
-            meta.setOrientation(LinearLayout.VERTICAL);
-            meta.setPadding(ZalithUiKit.dp(act, 12), 0, 0, 0);
-            TextView t1 = new TextView(act);
-            t1.setText(ver);
-            t1.setTextColor(0xFFFFFFFF);
-            t1.setTypeface(Typeface.DEFAULT_BOLD);
-            meta.addView(t1);
-            TextView t2 = new TextView(act);
-            t2.setText(ver);
-            t2.setTextColor(0xFF9CA3AF);
-            t2.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
-            meta.addView(t2);
-            card.addView(meta, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-
-            TextView gear = new TextView(act);
-            gear.setText("⚙");
-            gear.setTextColor(0xFFE5E7EB);
-            gear.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-            gear.setOnClickListener(v -> {
-                root.removeAllViews();
-                titleView.setText("Manage Versions - Overview");
-                root.addView(buildManage(act, ver, titleView), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            });
-            card.addView(gear);
-            list.addView(card, lp);
-        }
+        addVerCard(act, root, list, titleView, accent, "Rust Optimized 26.3", "26.3   Horizon Rust - 0.8.0");
+        addVerCard(act, root, list, titleView, accent, "Vanilla Rust 26.3", "26.3   Clean Native Engine");
         return root;
+    }
+
+    private static void addVerCard(final LauncherActivity act, final LinearLayout root, LinearLayout list,
+            final TextView titleView, int accent, final String title, String sub) {
+        LinearLayout card = new LinearLayout(act);
+        card.setGravity(Gravity.CENTER_VERTICAL);
+        card.setBackground(ZalithUiKit.roundRect(ZalithUiKit.CARD_GRAY, ZalithUiKit.dp(act, 14)));
+        card.setPadding(ZalithUiKit.dp(act, 14), ZalithUiKit.dp(act, 12), ZalithUiKit.dp(act, 14), ZalithUiKit.dp(act, 12));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.bottomMargin = ZalithUiKit.dp(act, 10);
+
+        TextView rad = new TextView(act);
+        rad.setText("◉  ");
+        rad.setTextColor(accent);
+        rad.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+        card.addView(rad);
+
+        ImageView ic = new ImageView(act);
+        ic.setImageBitmap(ZalithUiKit.rustIcon(ZalithUiKit.dp(act, 36)));
+        card.addView(ic, new LinearLayout.LayoutParams(ZalithUiKit.dp(act, 36), ZalithUiKit.dp(act, 36)));
+
+        LinearLayout meta = new LinearLayout(act);
+        meta.setOrientation(LinearLayout.VERTICAL);
+        meta.setPadding(ZalithUiKit.dp(act, 12), 0, 0, 0);
+        TextView t1 = new TextView(act);
+        t1.setText(title);
+        t1.setTextColor(0xFFFFFFFF);
+        t1.setTypeface(Typeface.DEFAULT_BOLD);
+        meta.addView(t1);
+        TextView t2 = new TextView(act);
+        t2.setText(sub);
+        t2.setTextColor(0xFF9CA3AF);
+        t2.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+        meta.addView(t2);
+        card.addView(meta, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        TextView gear = new TextView(act);
+        gear.setText("⚙");
+        gear.setTextColor(0xFFE5E7EB);
+        gear.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+        gear.setOnClickListener(v -> {
+            root.removeAllViews();
+            titleView.setText("Manage Versions - Overview");
+            root.addView(buildManage(act, title, titleView), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        });
+        card.addView(gear);
+        list.addView(card, lp);
     }
 
     public static View buildManage(final LauncherActivity act, final String verName, final TextView titleView) {
@@ -177,4 +175,4 @@ public final class ZalithVersionsView {
         }
         box.addView(card);
     }
-                         }
+}
