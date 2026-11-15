@@ -251,12 +251,16 @@ public class StarlingActivity extends NativeActivity {
      * motion, through NativeActivity's input queue like every other event.
      */
     public void capturePointer(final boolean capture) {
+        public void capturePointer(final boolean capture) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 pointerWanted = capture;
                 View decor = getWindow().getDecorView();
                 if (capture) {
+                    decor.setFocusable(true);
+                    decor.setFocusableInTouchMode(true);
+                    decor.requestFocus();
                     decor.requestPointerCapture();
                 } else {
                     decor.releasePointerCapture();
@@ -268,12 +272,19 @@ public class StarlingActivity extends NativeActivity {
     @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
         super.onPointerCaptureChanged(hasCapture);
-        // Lost while the game holds it (the window's focus went): the game lets go too.
+        boolean lockFocus = getIntent() == null || getIntent().getBooleanExtra(LauncherActivity.KEY_LOCK, true);
         if (!hasCapture && pointerWanted) {
+            if (lockFocus && hasWindowFocus()) {
+                View decor = getWindow().getDecorView();
+                decor.requestFocus();
+                decor.requestPointerCapture();
+                return;
+            }
             pointerWanted = false;
             onPointerCaptureLost();
         }
     }
+
 
     /** A controller's maker (its USB vendor id), for the game's button pictures; 0 unknown. */
     public int padVendor(int deviceId) {
