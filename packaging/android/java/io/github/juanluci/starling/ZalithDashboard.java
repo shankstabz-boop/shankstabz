@@ -22,7 +22,7 @@ public final class ZalithDashboard {
         }
         final SharedPreferences p = act.getSharedPreferences(LauncherActivity.PREFS, Context.MODE_PRIVATE);
         if (!p.contains("accounts_list")) {
-            p.edit().putString("accounts_list", "Shankstabz,qSHANKS").putString(LauncherActivity.KEY_USER, "qSHANKS").apply();
+            p.edit().putString("accounts_list", "player").putString(LauncherActivity.KEY_USER, "qSHANKS").apply();
         }
 
         LinearLayout root = new LinearLayout(act);
@@ -141,7 +141,7 @@ public final class ZalithDashboard {
         rCard.addView(head, new LinearLayout.LayoutParams(ZalithUiKit.dp(act, 64), ZalithUiKit.dp(act, 64)));
 
         TextView uName = new TextView(act);
-        uName.setText(p.getString(LauncherActivity.KEY_USER, "qSHANKS"));
+        uName.setText(p.getString(LauncherActivity.KEY_USER, "player"));
         uName.setTextColor(0xFFFFFFFF);
         uName.setTypeface(Typeface.DEFAULT_BOLD);
         uName.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
